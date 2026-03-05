@@ -26,6 +26,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
   const [filterValue, setFilterValue] = useState<string>('');
   const [filterEndDate, setFilterEndDate] = useState<string>('');
   const [filterError, setFilterError] = useState<string>('');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/tasks')
@@ -420,20 +421,32 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
             const overdue = isOverdue(task);
             return (
               <div key={task.id} className={`bg-white p-5 rounded-2xl shadow-sm border ${task.status === 'completed' ? 'border-emerald-200 bg-emerald-50/30' : overdue ? 'border-red-300 bg-red-50/30' : 'border-slate-200'} transition-all hover:shadow-md flex flex-col sm:flex-row sm:items-center gap-4`}>
-                <div className="flex-shrink-0 pt-1 sm:pt-0">
-                  <button
-                    onClick={() => handleStatusChange(task, task.status === 'completed' ? 'pending' : 'completed')}
-                    className="focus:outline-none group"
-                  >
-                    {task.status === 'completed' ? (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-500 group-hover:text-emerald-600 transition-colors" />
-                    ) : (
-                      <Circle className={`w-6 h-6 ${overdue ? 'text-red-400 group-hover:text-red-500' : 'text-slate-300 group-hover:text-indigo-500'} transition-colors`} />
-                    )}
-                  </button>
-                </div>
-                
-                <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="flex-shrink-0 pt-1 sm:pt-0">
+                    <button
+                      onClick={() => handleStatusChange(task, task.status === 'completed' ? 'pending' : 'completed')}
+                      className="focus:outline-none group"
+                    >
+                      {task.status === 'completed' ? (
+                        <CheckCircle2 className="w-6 h-6 text-emerald-500 group-hover:text-emerald-600 transition-colors" />
+                      ) : (
+                        <Circle className={`w-6 h-6 ${overdue ? 'text-red-400 group-hover:text-red-500' : 'text-slate-300 group-hover:text-indigo-500'} transition-colors`} />
+                      )}
+                    </button>
+                  </div>
+
+                  {currentUser.avatar && (
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={currentUser.avatar} 
+                        alt={currentUser.name} 
+                        className="w-8 h-8 rounded-full object-cover border border-slate-200 cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all" 
+                        onClick={() => setPreviewImage(currentUser.avatar || null)}
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className={`text-base font-semibold truncate ${task.status === 'completed' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                       {task.title}
@@ -481,8 +494,9 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                     )}
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2 sm:self-start sm:ml-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+              <div className="flex items-center gap-2 sm:self-start sm:ml-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                   <button
                     onClick={() => startEditing(task)}
                     className={`p-2 rounded-lg transition-colors ${overdue ? 'text-red-400 hover:text-red-600 hover:bg-red-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
@@ -529,6 +543,29 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                 Delete Task
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl w-full flex items-center justify-center">
+            <button 
+              className="absolute -top-12 right-0 text-white hover:text-slate-300 transition-colors"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img 
+              src={previewImage} 
+              alt="Preview" 
+              className="max-h-[80vh] max-w-full rounded-2xl shadow-2xl border-4 border-white/10 object-contain animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}

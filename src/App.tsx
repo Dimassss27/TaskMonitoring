@@ -4,11 +4,12 @@ import Login from './pages/Login';
 import ManagerDashboard from './pages/ManagerDashboard';
 import StaffDashboard from './pages/StaffDashboard';
 import { ProfileModal } from './components/ProfileModal';
-import { Settings } from 'lucide-react';
+import { Settings, X } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -50,7 +51,12 @@ export default function App() {
         <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
           <div className="flex items-center gap-2 overflow-hidden">
             {currentUser.avatar ? (
-              <img src={currentUser.avatar} alt="Profile" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-slate-200 shrink-0" />
+              <img 
+                src={currentUser.avatar} 
+                alt="Profile" 
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-slate-200 shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all" 
+                onClick={() => setPreviewImage(currentUser.avatar || null)}
+              />
             ) : (
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-medium text-xs sm:text-sm shrink-0">
                 {currentUser.name.charAt(0).toUpperCase()}
@@ -98,6 +104,29 @@ export default function App() {
           onClose={() => setIsProfileModalOpen(false)}
           onUpdate={handleUpdateProfile}
         />
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl w-full flex items-center justify-center">
+            <button 
+              className="absolute -top-12 right-0 text-white hover:text-slate-300 transition-colors"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img 
+              src={previewImage} 
+              alt="Preview" 
+              className="max-h-[80vh] max-w-full rounded-2xl shadow-2xl border-4 border-white/10 object-contain animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

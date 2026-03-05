@@ -40,6 +40,7 @@ export default function ManagerDashboard() {
   const [editStaffName, setEditStaffName] = useState('');
   const [editStaffPassword, setEditStaffPassword] = useState('');
   const [editStaffError, setEditStaffError] = useState('');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -633,7 +634,12 @@ export default function ManagerDashboard() {
               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {staff.avatar ? (
-                    <img src={staff.avatar} alt={staff.name} className="w-10 h-10 rounded-full object-cover border border-slate-200" />
+                    <img 
+                      src={staff.avatar} 
+                      alt={staff.name} 
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200 cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all" 
+                      onClick={() => setPreviewImage(staff.avatar || null)}
+                    />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
                       {staff.name.charAt(0).toUpperCase()}
@@ -693,7 +699,21 @@ export default function ManagerDashboard() {
                       const overdue = isOverdue(task);
                       return (
                         <div key={task.id} className={`p-4 rounded-xl border ${overdue ? 'border-red-200 bg-red-50/30' : 'border-slate-100 bg-white'} shadow-sm hover:shadow-md transition-shadow flex items-start gap-3`}>
-                          <div className="mt-0.5">{overdue ? <AlertCircle className="w-4 h-4 text-red-600" /> : getStatusIcon(task.status)}</div>
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="mt-0.5">{overdue ? <AlertCircle className="w-4 h-4 text-red-600" /> : getStatusIcon(task.status)}</div>
+                            {staff.avatar ? (
+                              <img 
+                                src={staff.avatar} 
+                                alt={staff.name} 
+                                className="w-6 h-6 rounded-full object-cover border border-slate-200 cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all" 
+                                onClick={() => setPreviewImage(staff.avatar || null)}
+                              />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-[8px] font-bold">
+                                {staff.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="text-sm font-semibold text-slate-900 truncate">{task.title}</h3>
@@ -746,11 +766,25 @@ export default function ManagerDashboard() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200">
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900">Manage Staff Account</h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 font-bold uppercase tracking-wider border border-indigo-100">
-                  Role: {editStaffId.split('-')[0]}
-                </span>
+              <div className="flex items-center gap-3">
+                {managingStaff.avatar ? (
+                  <img 
+                    src={managingStaff.avatar} 
+                    alt={managingStaff.name} 
+                    className="w-12 h-12 rounded-full object-cover border border-slate-200 cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all"
+                    onClick={() => setPreviewImage(managingStaff.avatar || null)}
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-lg">
+                    {managingStaff.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Manage Staff Account</h3>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 font-bold uppercase tracking-wider border border-indigo-100">
+                    Role: {editStaffId.split('-')[0]}
+                  </span>
+                </div>
               </div>
               <button onClick={() => setManagingStaff(null)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
@@ -841,6 +875,29 @@ export default function ManagerDashboard() {
           </div>
         </div>
       )}
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl w-full flex items-center justify-center">
+            <button 
+              className="absolute -top-12 right-0 text-white hover:text-slate-300 transition-colors"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img 
+              src={previewImage} 
+              alt="Preview" 
+              className="max-h-[80vh] max-w-full rounded-2xl shadow-2xl border-4 border-white/10 object-contain animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Database Inspector Modal */}
       {showDbInspector && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
