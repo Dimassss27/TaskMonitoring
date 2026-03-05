@@ -11,9 +11,9 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  // Load user from localStorage on mount
+  // Load user from sessionStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
+    const savedUser = sessionStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(JSON.parse(savedUser));
     }
@@ -21,17 +21,17 @@ export default function App() {
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    sessionStorage.setItem('currentUser', JSON.stringify(user));
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUser');
   };
 
   const handleUpdateProfile = (updatedUser: User) => {
     setCurrentUser(updatedUser);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
     setIsProfileModalOpen(false);
   };
 
