@@ -323,48 +323,37 @@ export default function ManagerDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <LayoutDashboard className="w-6 h-6 text-indigo-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <LayoutDashboard className="w-7 h-7 text-indigo-600" />
             Manager Dashboard
           </h1>
-          <p className="text-slate-500 mt-1">Real-time overview of your team's tasks.</p>
+          <p className="text-slate-500 mt-1">Real-time overview of your team's performance and tasks.</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full lg:w-auto">
           <button
             onClick={() => setIsAddingStaff(true)}
-            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2"
+            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-2 active:scale-95"
           >
             <UserPlus className="w-5 h-5" />
             Add Staff
           </button>
           <button
             onClick={fetchDebugUsers}
-            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2"
+            className="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95"
             title="View Raw Database Tables"
           >
             <Settings2 className="w-5 h-5" />
             Database
           </button>
-          <div className="w-full sm:w-auto bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <Users className="w-5 h-5 text-indigo-600" />
+          <div className="flex-1 sm:flex-none bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center gap-3">
+            <div className="p-1.5 bg-indigo-50 rounded-lg">
+              <Users className="w-4 h-4 text-indigo-600" />
             </div>
-            <div>
-              <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Staff</div>
-              <div className="text-lg font-bold text-slate-900">{staffUsers.length}</div>
-            </div>
-          </div>
-          <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
-            <div className="p-2 bg-emerald-50 rounded-lg">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div>
-              <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Completed</div>
-              <div className="text-lg font-bold text-slate-900">
-                {tasks.filter(t => t.status === 'completed').length} / {tasks.length}
-              </div>
+            <div className="text-left">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Total Staff</div>
+              <div className="text-sm font-bold text-slate-900">{staffUsers.length} Members</div>
             </div>
           </div>
         </div>
@@ -449,49 +438,41 @@ export default function ManagerDashboard() {
       )}
 
       {/* Analytics & History Section */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <BarChart2 className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-slate-900">Task History & Analytics</h2>
-          </div>
-          <div className="text-xs font-medium text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-            Filter by Staff, Priority, Status, Date Range, Month, or Year
-          </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row flex-wrap items-end gap-4 mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[200px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Staff Member</label>
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Staff Member</label>
             <select 
               value={filterStaffId} 
               onChange={(e) => setFilterStaffId(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm transition-all"
             >
               <option value="all">All Staff</option>
-              {staffUsers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {staffUsers.map(u => (
+                <option key={u.id} value={u.id}>{u.name}</option>
+              ))}
             </select>
           </div>
 
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[150px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Priority</label>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Priority</label>
             <select 
               value={filterPriority} 
               onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm transition-all"
             >
-              <option value="all">All Priorities</option>
+              <option value="all">All Priority</option>
               <option value="urgent">Urgent</option>
               <option value="normal">Normal</option>
             </select>
           </div>
 
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[150px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Status</label>
             <select 
               value={filterStatus} 
               onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm transition-all"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -500,8 +481,8 @@ export default function ManagerDashboard() {
             </select>
           </div>
 
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[150px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filter Period</label>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Period</label>
             <select 
               value={filterType} 
               onChange={(e) => {
@@ -510,7 +491,7 @@ export default function ManagerDashboard() {
                 setFilterEndDate('');
                 setFilterError('');
               }}
-              className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm transition-all"
             >
               <option value="all">All Time</option>
               <option value="date">Specific Date</option>
@@ -520,8 +501,8 @@ export default function ManagerDashboard() {
           </div>
 
           {filterType === 'date' && (
-            <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Date Range (Max 2 Weeks)</label>
+            <div className="flex flex-col gap-1.5 col-span-full lg:col-auto">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Date Range (Max 2 Weeks)</label>
               <div className="flex items-center gap-2">
                 <input 
                   type="date" 
@@ -530,9 +511,9 @@ export default function ManagerDashboard() {
                     setFilterValue(e.target.value);
                     setFilterError('');
                   }}
-                  className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full sm:w-32"
+                  className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm flex-1 sm:w-32"
                 />
-                <span className="text-slate-400">to</span>
+                <span className="text-slate-400 text-xs">to</span>
                 <input 
                   type="date" 
                   value={filterEndDate}
@@ -548,32 +529,32 @@ export default function ManagerDashboard() {
                       setFilterEndDate(e.target.value);
                     }
                   }}
-                  className={`px-3 py-2 rounded-lg border ${filterError ? 'border-red-500' : 'border-slate-300'} focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full sm:w-32`}
+                  className={`px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm flex-1 sm:w-32`}
                 />
               </div>
-              {filterError && <span className="text-[10px] text-red-500 font-medium">{filterError}</span>}
+              {filterError && <span className="text-[10px] text-red-500 font-medium ml-1">{filterError}</span>}
             </div>
           )}
 
           {filterType === 'month' && (
-            <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[150px]">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Month</label>
+            <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Month</label>
               <input 
                 type="month" 
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full"
+                className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm"
               />
             </div>
           )}
 
           {filterType === 'year' && (
-            <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[150px]">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Year</label>
+            <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Year</label>
               <select 
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white w-full"
+                className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm"
               >
                 <option value="">Choose Year...</option>
                 {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
@@ -583,10 +564,10 @@ export default function ManagerDashboard() {
             </div>
           )}
 
-          <div className="w-full sm:w-auto ml-auto">
+          <div className="col-span-full lg:col-auto lg:ml-auto">
             <button
               onClick={downloadReport}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center justify-center gap-2 text-sm"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-100 transition-all flex items-center justify-center gap-2 text-sm active:scale-95"
             >
               <Download className="w-4 h-4" />
               Download Report

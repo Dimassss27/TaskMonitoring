@@ -210,25 +210,26 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             {filterType === 'all' ? 'My Tasks' : 'Task History'}
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 max-w-2xl">
             {filterType === 'all' 
-              ? 'Manage your daily workload and deadlines.' 
+              ? 'Manage your daily workload and deadlines efficiently.' 
               : filterType === 'date' && filterEndDate 
                 ? `Viewing history from ${filterValue} to ${filterEndDate}`
                 : `Viewing history for ${filterType}: ${filterValue || '...'}`}
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex flex-wrap gap-2">
+        
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full lg:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 flex-1">
             <select 
               value={filterPriority} 
               onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all"
             >
               <option value="all">All Priorities</option>
               <option value="urgent">Urgent</option>
@@ -238,7 +239,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
             <select 
               value={filterStatus} 
               onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -254,50 +255,46 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                 setFilterEndDate('');
                 setFilterError('');
               }}
-              className="px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white"
+              className="col-span-2 sm:col-auto px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all"
             >
               <option value="all">All History</option>
               <option value="date">By Date</option>
               <option value="month">By Month</option>
               <option value="year">By Year</option>
             </select>
+          </div>
 
+          <div className="flex flex-col sm:flex-row items-stretch gap-2">
             {filterType === 'date' && (
-              <div className="flex items-center gap-2">
-                <div className="flex flex-col">
-                  <input 
-                    type="date" 
-                    value={filterValue}
-                    onChange={(e) => {
-                      setFilterValue(e.target.value);
+              <div className="flex items-center gap-2 relative">
+                <input 
+                  type="date" 
+                  value={filterValue}
+                  onChange={(e) => {
+                    setFilterValue(e.target.value);
+                    setFilterError('');
+                  }}
+                  className="flex-1 sm:w-32 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
+                />
+                <span className="text-slate-400 text-xs">to</span>
+                <input 
+                  type="date" 
+                  value={filterEndDate}
+                  onChange={(e) => {
+                    const start = new Date(filterValue);
+                    const end = new Date(e.target.value);
+                    const diffDays = Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays > 14) {
+                      setFilterError('Max 2 weeks');
+                    } else {
                       setFilterError('');
-                    }}
-                    className="px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white"
-                    placeholder="Start Date"
-                  />
-                </div>
-                <span className="text-slate-400">to</span>
-                <div className="flex flex-col">
-                  <input 
-                    type="date" 
-                    value={filterEndDate}
-                    onChange={(e) => {
-                      const start = new Date(filterValue);
-                      const end = new Date(e.target.value);
-                      const diffDays = Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-                      
-                      if (diffDays > 14) {
-                        setFilterError('Max range is 2 weeks');
-                      } else {
-                        setFilterError('');
-                        setFilterEndDate(e.target.value);
-                      }
-                    }}
-                    className={`px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-300'} focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white`}
-                    placeholder="End Date"
-                  />
-                </div>
-                {filterError && <span className="text-[10px] text-red-500 font-medium absolute -bottom-4 left-0">{filterError}</span>}
+                      setFilterEndDate(e.target.value);
+                    }
+                  }}
+                  className={`flex-1 sm:w-32 px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm`}
+                />
+                {filterError && <span className="absolute -bottom-4 left-0 text-[10px] text-red-500 font-medium whitespace-nowrap">{filterError}</span>}
               </div>
             )}
 
@@ -306,7 +303,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                 type="month" 
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white"
+                className="w-full sm:w-40 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
               />
             )}
 
@@ -314,7 +311,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
               <select 
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white"
+                className="w-full sm:w-32 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
               >
                 <option value="">Year...</option>
                 {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
@@ -322,16 +319,17 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                 ))}
               </select>
             )}
+
+            {!isAdding && (
+              <button
+                onClick={() => setIsAdding(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                New Task
+              </button>
+            )}
           </div>
-          {!isAdding && (
-            <button
-              onClick={() => setIsAdding(true)}
-              className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              New Task
-            </button>
-          )}
         </div>
       </div>
 
