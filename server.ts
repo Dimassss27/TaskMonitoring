@@ -15,7 +15,8 @@ const PORT = 3000;
 app.use(express.json());
 
 // Database Setup
-const db = new Database('tasks.db');
+const dbPath = process.env.DATABASE_PATH || 'tasks.db';
+const db = new Database(dbPath);
 
 // Initialize DB schema
 db.exec(`
@@ -62,9 +63,7 @@ try {
 const usersCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
 if (usersCount.count === 0) {
   const insertUser = db.prepare('INSERT INTO users (id, name, role, password) VALUES (?, ?, ?, ?)');
-  insertUser.run('manager-1', 'Alice (Manager)', 'manager', 'admin123');
-  insertUser.run('staff-1', 'Bob (Staff)', 'staff', 'staff123');
-  insertUser.run('staff-2', 'Charlie (Staff)', 'staff', 'staff123');
+  insertUser.run('manager-1', 'Alice (Manager)', 'manager', 'manager123');
 }
 
 // Auth Route
