@@ -70,7 +70,7 @@ try {
 const usersCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
 if (usersCount.count === 0) {
   const insertUser = db.prepare('INSERT INTO users (id, name, role, password) VALUES (?, ?, ?, ?)');
-  insertUser.run('manager-1', 'Alice (Manager)', 'manager', 'manager123');
+  insertUser.run('manager-1', '(Manager)', 'manager', 'manager123');
 }
 
 // Emergency Manager Password Reset via Environment Variable
