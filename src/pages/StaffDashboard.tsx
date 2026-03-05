@@ -149,30 +149,45 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
     }
   };
 
+  const getJakartaDate = (dateStr: string) => {
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date(dateStr));
+    } catch (e) {
+      return format(new Date(dateStr), 'yyyy-MM-dd');
+    }
+  };
+
   const filteredTasks = tasks.filter(task => {
     if (filterPriority !== 'all' && task.priority !== filterPriority) return false;
     if (filterStatus !== 'all' && task.status !== filterStatus) return false;
     
     if (filterType !== 'all' && filterValue) {
-      const taskDate = task.deadline ? new Date(task.deadline) : new Date(task.created_at);
-      if (isNaN(taskDate.getTime())) return false;
+      const deadlineStr = task.deadline; // YYYY-MM-DD
+      const updatedAtStr = task.updated_at ? getJakartaDate(task.updated_at) : null;
+      const createdAtStr = getJakartaDate(task.created_at);
 
-      if (filterType === 'date') {
-        const taskDateStr = format(taskDate, 'yyyy-MM-dd');
-        if (filterEndDate) {
-          // Range filter
-          return taskDateStr >= filterValue && taskDateStr <= filterEndDate;
-        } else {
-          // Single date filter
-          if (taskDateStr !== filterValue) return false;
+      const checkDate = (dateStr: string | null) => {
+        if (!dateStr) return false;
+        if (filterType === 'date') {
+          if (filterEndDate) {
+            return dateStr >= filterValue && dateStr <= filterEndDate;
+          }
+          return dateStr === filterValue;
+        } else if (filterType === 'month') {
+          return dateStr.substring(0, 7) === filterValue;
+        } else if (filterType === 'year') {
+          return dateStr.substring(0, 4) === filterValue;
         }
-      } else if (filterType === 'month') {
-        const taskMonthStr = format(taskDate, 'yyyy-MM');
-        if (taskMonthStr !== filterValue) return false;
-      } else if (filterType === 'year') {
-        const taskYearStr = format(taskDate, 'yyyy');
-        if (taskYearStr !== filterValue) return false;
-      }
+        return false;
+      };
+
+      // If ANY of the dates match the filter, include the task
+      return checkDate(deadlineStr) || checkDate(updatedAtStr) || checkDate(createdAtStr);
     }
 
     return true;
@@ -224,12 +239,12 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
           </p>
         </div>
         
-        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full lg:w-auto">
-          <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 flex-1">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full lg:w-auto max-w-full overflow-hidden">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 flex-1 min-w-0">
             <select 
               value={filterPriority} 
               onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all min-w-0"
             >
               <option value="all">All Priorities</option>
               <option value="urgent">Urgent</option>
@@ -239,7 +254,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
             <select 
               value={filterStatus} 
               onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all"
+              className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all min-w-0"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -255,7 +270,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                 setFilterEndDate('');
                 setFilterError('');
               }}
-              className="col-span-2 sm:col-auto px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all"
+              className="col-span-2 sm:col-auto px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm transition-all min-w-0"
             >
               <option value="all">All History</option>
               <option value="date">By Date</option>
@@ -264,9 +279,9 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
             </select>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch gap-2 shrink-0">
             {filterType === 'date' && (
-              <div className="flex items-center gap-2 relative">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 relative w-full sm:w-auto">
                 <input 
                   type="date" 
                   value={filterValue}
@@ -274,9 +289,9 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                     setFilterValue(e.target.value);
                     setFilterError('');
                   }}
-                  className="flex-1 sm:w-32 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
+                  className="w-full sm:w-32 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
                 />
-                <span className="text-slate-400 text-xs">to</span>
+                <span className="text-slate-400 text-xs text-center">to</span>
                 <input 
                   type="date" 
                   value={filterEndDate}
@@ -292,7 +307,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                       setFilterEndDate(e.target.value);
                     }
                   }}
-                  className={`flex-1 sm:w-32 px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm`}
+                  className={`w-full sm:w-32 px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm`}
                 />
                 {filterError && <span className="absolute -bottom-4 left-0 text-[10px] text-red-500 font-medium whitespace-nowrap">{filterError}</span>}
               </div>

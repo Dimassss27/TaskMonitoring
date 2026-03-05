@@ -230,34 +230,47 @@ export default function ManagerDashboard() {
     }
   };
 
+  const getJakartaDate = (dateStr: string) => {
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date(dateStr));
+    } catch (e) {
+      return format(new Date(dateStr), 'yyyy-MM-dd');
+    }
+  };
+
   // Apply filters for the chart
   const filteredTasks = tasks.filter(task => {
     if (filterStaffId !== 'all' && task.staff_id !== filterStaffId) return false;
     if (filterPriority !== 'all' && task.priority !== filterPriority) return false;
     if (filterStatus !== 'all' && task.status !== filterStatus) return false;
 
-    if (filterType !== 'all' && filterValue && task.deadline) {
-      const taskDate = new Date(task.deadline);
-      if (isNaN(taskDate.getTime())) return false;
+    if (filterType !== 'all' && filterValue) {
+      const deadlineStr = task.deadline; // YYYY-MM-DD
+      const updatedAtStr = task.updated_at ? getJakartaDate(task.updated_at) : null;
+      const createdAtStr = getJakartaDate(task.created_at);
 
-      if (filterType === 'date') {
-        const taskDateStr = format(taskDate, 'yyyy-MM-dd');
-        if (filterEndDate) {
-          // Range filter
-          return taskDateStr >= filterValue && taskDateStr <= filterEndDate;
-        } else {
-          // Single date filter
-          if (taskDateStr !== filterValue) return false;
+      const checkDate = (dateStr: string | null) => {
+        if (!dateStr) return false;
+        if (filterType === 'date') {
+          if (filterEndDate) {
+            return dateStr >= filterValue && dateStr <= filterEndDate;
+          }
+          return dateStr === filterValue;
+        } else if (filterType === 'month') {
+          return dateStr.substring(0, 7) === filterValue;
+        } else if (filterType === 'year') {
+          return dateStr.substring(0, 4) === filterValue;
         }
-      } else if (filterType === 'month') {
-        const taskMonthStr = format(taskDate, 'yyyy-MM');
-        if (taskMonthStr !== filterValue) return false;
-      } else if (filterType === 'year') {
-        const taskYearStr = format(taskDate, 'yyyy');
-        if (taskYearStr !== filterValue) return false;
-      }
-    } else if (filterType !== 'all' && filterValue && !task.deadline) {
-      return false;
+        return false;
+      };
+
+      // If ANY of the dates match the filter, include the task
+      return checkDate(deadlineStr) || checkDate(updatedAtStr) || checkDate(createdAtStr);
     }
 
     return true;
@@ -503,7 +516,7 @@ export default function ManagerDashboard() {
           {filterType === 'date' && (
             <div className="flex flex-col gap-1.5 col-span-full lg:col-auto">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Date Range (Max 2 Weeks)</label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <input 
                   type="date" 
                   value={filterValue}
@@ -513,7 +526,7 @@ export default function ManagerDashboard() {
                   }}
                   className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm flex-1 sm:w-32"
                 />
-                <span className="text-slate-400 text-xs">to</span>
+                <span className="text-slate-400 text-xs text-center">to</span>
                 <input 
                   type="date" 
                   value={filterEndDate}
