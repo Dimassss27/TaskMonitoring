@@ -281,7 +281,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
 
           <div className="flex flex-col sm:flex-row items-stretch gap-2 shrink-0">
             {filterType === 'date' && (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 relative w-full sm:w-auto">
+              <div className="flex items-center gap-2 relative w-full sm:w-auto">
                 <input 
                   type="date" 
                   value={filterValue}
@@ -289,9 +289,9 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                     setFilterValue(e.target.value);
                     setFilterError('');
                   }}
-                  className="w-full sm:w-32 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
+                  className="flex-1 sm:w-32 px-2 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-[11px] sm:text-sm bg-white shadow-sm min-w-0"
                 />
-                <span className="text-slate-400 text-xs text-center">to</span>
+                <span className="text-slate-400 text-[10px] shrink-0">to</span>
                 <input 
                   type="date" 
                   value={filterEndDate}
@@ -307,7 +307,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                       setFilterEndDate(e.target.value);
                     }
                   }}
-                  className={`w-full sm:w-32 px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm`}
+                  className={`flex-1 sm:w-32 px-2 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-[11px] sm:text-sm bg-white shadow-sm min-w-0`}
                 />
                 {filterError && <span className="absolute -bottom-4 left-0 text-[10px] text-red-500 font-medium whitespace-nowrap">{filterError}</span>}
               </div>
@@ -318,7 +318,7 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                 type="month" 
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="w-full sm:w-40 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
+                className="w-full sm:w-40 max-w-[180px] px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-xs sm:text-sm bg-white shadow-sm"
               />
             )}
 

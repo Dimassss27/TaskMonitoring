@@ -516,7 +516,7 @@ export default function ManagerDashboard() {
           {filterType === 'date' && (
             <div className="flex flex-col gap-1.5 col-span-full lg:col-auto">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Date Range (Max 2 Weeks)</label>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center gap-2">
                 <input 
                   type="date" 
                   value={filterValue}
@@ -524,9 +524,9 @@ export default function ManagerDashboard() {
                     setFilterValue(e.target.value);
                     setFilterError('');
                   }}
-                  className="px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm flex-1 sm:w-32"
+                  className="px-2 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-[11px] sm:text-sm bg-white shadow-sm flex-1 sm:w-32 min-w-0"
                 />
-                <span className="text-slate-400 text-xs text-center">to</span>
+                <span className="text-slate-400 text-[10px] shrink-0">to</span>
                 <input 
                   type="date" 
                   value={filterEndDate}
@@ -542,7 +542,7 @@ export default function ManagerDashboard() {
                       setFilterEndDate(e.target.value);
                     }
                   }}
-                  className={`px-3 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white shadow-sm flex-1 sm:w-32`}
+                  className={`px-2 py-2 rounded-xl border ${filterError ? 'border-red-500' : 'border-slate-200'} focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-[11px] sm:text-sm bg-white shadow-sm flex-1 sm:w-32 min-w-0`}
                 />
               </div>
               {filterError && <span className="text-[10px] text-red-500 font-medium ml-1">{filterError}</span>}
@@ -550,7 +550,7 @@ export default function ManagerDashboard() {
           )}
 
           {filterType === 'month' && (
-            <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <div className="flex flex-col gap-1.5 flex-1 min-w-[140px] max-w-[200px]">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Month</label>
               <input 
                 type="month" 
