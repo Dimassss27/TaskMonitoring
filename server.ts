@@ -12,7 +12,8 @@ const io = new Server(httpServer, {
 });
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Database Setup
 const dbPath = process.env.DATABASE_PATH || 'tasks.db';
@@ -70,7 +71,7 @@ try {
 const usersCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
 if (usersCount.count === 0) {
   const insertUser = db.prepare('INSERT INTO users (id, name, role, password) VALUES (?, ?, ?, ?)');
-  insertUser.run('manager-1', '(Manager)', 'manager', 'manager123');
+  insertUser.run('manager-1', ' (Manager)', 'manager', 'manager123');
 }
 
 // Emergency Manager Password Reset via Environment Variable
@@ -173,7 +174,14 @@ app.put('/api/users/:id/profile', (req, res) => {
   const { newId, name, password, avatar } = req.body;
   
   try {
+    const currentUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+    if (!currentUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const targetId = newId || id;
+    const finalName = name !== undefined ? name : currentUser.name;
+    const finalAvatar = avatar !== undefined ? avatar : currentUser.avatar;
     
     // Disable FKs temporarily for the update if ID is changing
     if (newId && newId !== id) {
@@ -188,9 +196,9 @@ app.put('/api/users/:id/profile', (req, res) => {
 
     // Update user
     if (password) {
-      db.prepare('UPDATE users SET id = ?, name = ?, password = ?, avatar = ? WHERE id = ?').run(targetId, name, password, avatar || null, id);
+      db.prepare('UPDATE users SET id = ?, name = ?, password = ?, avatar = ? WHERE id = ?').run(targetId, finalName, password, finalAvatar, id);
     } else {
-      db.prepare('UPDATE users SET id = ?, name = ?, avatar = ? WHERE id = ?').run(targetId, name, avatar || null, id);
+      db.prepare('UPDATE users SET id = ?, name = ?, avatar = ? WHERE id = ?').run(targetId, finalName, finalAvatar, id);
     }
     
     // Re-enable FKs
@@ -208,10 +216,10 @@ app.put('/api/users/:id/profile', (req, res) => {
     io.emit('user:updated', updatedUser);
     res.json(updatedUser);
   } catch (error) {
-    console.error(error);
+    console.error('Profile update error:', error);
     // Ensure FKs are back on if they were off
     db.exec('PRAGMA foreign_keys = ON');
-    res.status(400).json({ error: 'Failed to update profile. ID might already exist.' });
+    res.status(400).json({ error: 'Failed to update profile. ID might already exist or data is invalid.' });
   }
 });
 

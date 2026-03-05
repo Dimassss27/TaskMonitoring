@@ -588,28 +588,36 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
-        <div className="h-80 w-full">
-          {chartData.every(d => d.completed === 0 && d.inProgress === 0 && d.pending === 0) ? (
-            <div className="h-full flex items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">
-              No tasks found for the selected filters.
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} allowDecimals={false} />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="completed" name="Completed" stackId="a" fill="#10b981" />
-                <Bar dataKey="inProgress" name="In Progress" stackId="a" fill="#f59e0b" />
-                <Bar dataKey="pending" name="Pending" stackId="a" fill="#cbd5e1" />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+        <div className="w-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          <div className="h-80" style={{ minWidth: `${Math.max(100, chartData.length * 100)}px` }}>
+            {chartData.every(d => d.completed === 0 && d.inProgress === 0 && d.pending === 0) ? (
+              <div className="h-full flex items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">
+                No tasks found for the selected filters.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#64748b', fontSize: 10 }} 
+                    interval={0}
+                  />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} allowDecimals={false} />
+                  <Tooltip 
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                  <Bar dataKey="completed" name="Completed" stackId="a" fill="#10b981" />
+                  <Bar dataKey="inProgress" name="In Progress" stackId="a" fill="#f59e0b" />
+                  <Bar dataKey="pending" name="Pending" stackId="a" fill="#cbd5e1" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
       </div>
 

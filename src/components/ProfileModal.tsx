@@ -48,8 +48,14 @@ export function ProfileModal({ user, onClose, onUpdate }: ProfileModalProps) {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update profile');
+        let errorMessage = 'Failed to update profile';
+        try {
+          const data = await response.json();
+          errorMessage = data.error || errorMessage;
+        } catch (e) {
+          if (response.status === 413) errorMessage = 'Photo file size is too large. Please use a smaller image.';
+        }
+        throw new Error(errorMessage);
       }
 
       const updatedUser = await response.json();
