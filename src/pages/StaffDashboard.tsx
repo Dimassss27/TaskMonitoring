@@ -476,24 +476,27 @@ export default function StaffDashboard({ currentUser }: StaffDashboardProps) {
                   )}
                   
                   <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className={`text-base font-semibold truncate ${task.status === 'completed' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
-                      {task.title}
-                    </h3>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {task.priority === 'urgent' && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
-                          Urgent
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mb-1">
+                      <h3 className={`text-base font-semibold truncate ${task.status === 'completed' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
+                        {task.title}
+                      </h3>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold uppercase tracking-tight">
+                          {currentUser.id.split('-')[0]}
                         </span>
-                      )}
-                      {overdue && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white uppercase tracking-wider flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
-                          Overdue
-                        </span>
-                      )}
+                        {task.priority === 'urgent' && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
+                            Urgent
+                          </span>
+                        )}
+                        {overdue && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white uppercase tracking-wider flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            Overdue
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
                   {task.description && (
                     <p className={`text-sm mt-1 line-clamp-2 ${task.status === 'completed' ? 'text-slate-400' : 'text-slate-600'}`}>
                       {task.description}

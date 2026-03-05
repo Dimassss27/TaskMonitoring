@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import ManagerDashboard from './pages/ManagerDashboard';
 import StaffDashboard from './pages/StaffDashboard';
 import { ProfileModal } from './components/ProfileModal';
-import { Settings, X } from 'lucide-react';
+import { Settings, X, LogOut } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -63,9 +63,9 @@ export default function App() {
               </div>
             )}
             <div className="text-xs sm:text-sm text-slate-500 truncate flex flex-col">
-              <div className="flex items-center gap-1">
-                <span className="font-medium text-slate-900">{currentUser.name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold uppercase tracking-tight">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+                <span className="font-medium text-slate-900 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+                <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold uppercase tracking-tight w-fit">
                   {currentUser.id.split('-')[0]}
                 </span>
               </div>
@@ -82,9 +82,11 @@ export default function App() {
             </button>
             <button
               onClick={handleLogout}
-              className="text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-1 sm:px-2"
+              className="p-1.5 sm:p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
+              title="Sign out"
             >
-              Sign out
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline text-sm font-medium">Sign out</span>
             </button>
           </div>
         </div>

@@ -648,9 +648,9 @@ export default function ManagerDashboard() {
                     </div>
                   )}
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <h2 className="font-semibold text-slate-900">{staff.name}</h2>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-bold uppercase tracking-tight">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
+                      <h2 className="font-semibold text-slate-900 truncate max-w-[120px] sm:max-w-none">{staff.name}</h2>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-bold uppercase tracking-tight w-fit">
                         {staff.id.split('-')[0]}
                       </span>
                     </div>
