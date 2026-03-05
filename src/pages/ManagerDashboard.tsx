@@ -18,6 +18,15 @@ export default function ManagerDashboard() {
   const [filterError, setFilterError] = useState<string>('');
   const [filterPriority, setFilterPriority] = useState<'all' | 'urgent' | 'normal'>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'in-progress' | 'completed'>('all');
+  const [showDbInspector, setShowDbInspector] = useState(false);
+  const [debugUsers, setDebugUsers] = useState<any[]>([]);
+
+  const fetchDebugUsers = async () => {
+    const res = await fetch('/api/admin/debug/users');
+    const data = await res.json();
+    setDebugUsers(data);
+    setShowDbInspector(true);
+  };
 
   // Staff Management
   const [isAddingStaff, setIsAddingStaff] = useState(false);
@@ -269,17 +278,35 @@ export default function ManagerDashboard() {
   const downloadReport = () => {
     const headers = ['Task Title', 'Description', 'Priority', 'Status', 'Deadline', 'Staff Name', 'Created At'];
     
-    const rows = filteredTasks.map(task => {
-      const staff = users.find(u => u.id === task.staff_id);
-      return [
-        `"${task.title.replace(/"/g, '""')}"`,
-        `"${(task.description || '').replace(/"/g, '""')}"`,
-        task.priority,
-        task.status,
-        task.deadline ? format(new Date(task.deadline), 'yyyy-MM-dd') : 'No deadline',
-        `"${staff ? staff.name : 'Unknown'}"`,
-        formatJakartaTime(task.created_at)
-      ].join(',');
+    const staffToInclude = staffUsers.filter(staff => filterStaffId === 'all' || staff.id === filterStaffId);
+    const rows: string[] = [];
+
+    staffToInclude.forEach(staff => {
+      const staffTasks = filteredTasks.filter(t => t.staff_id === staff.id);
+      
+      if (staffTasks.length === 0) {
+        rows.push([
+          '"(No tasks found)"',
+          '"-"',
+          '"-"',
+          '"-"',
+          '"-"',
+          `"${staff.name}"`,
+          '"-"'
+        ].join(','));
+      } else {
+        staffTasks.forEach(task => {
+          rows.push([
+            `"${task.title.replace(/"/g, '""')}"`,
+            `"${(task.description || '').replace(/"/g, '""')}"`,
+            task.priority,
+            task.status,
+            task.deadline ? format(new Date(task.deadline), 'yyyy-MM-dd') : 'No deadline',
+            `"${staff.name}"`,
+            formatJakartaTime(task.created_at)
+          ].join(','));
+        });
+      }
     });
 
     const csvContent = [headers.join(','), ...rows].join('\n');
@@ -310,6 +337,14 @@ export default function ManagerDashboard() {
           >
             <UserPlus className="w-5 h-5" />
             Add Staff
+          </button>
+          <button
+            onClick={fetchDebugUsers}
+            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-medium shadow-sm transition-colors flex items-center justify-center gap-2"
+            title="View Raw Database Tables"
+          >
+            <Settings2 className="w-5 h-5" />
+            Database
           </button>
           <div className="w-full sm:w-auto bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
             <div className="p-2 bg-indigo-50 rounded-lg">
@@ -592,7 +627,6 @@ export default function ManagerDashboard() {
           const progress = staffTasks.length === 0 ? 0 : Math.round((completedTasks / staffTasks.length) * 100);
 
           if (filterStaffId !== 'all' && staff.id !== filterStaffId) return null;
-          if (staffTasks.length === 0 && filterType !== 'all') return null;
 
           return (
             <div key={staff.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -650,7 +684,9 @@ export default function ManagerDashboard() {
 
               <div className="p-5 flex-1 overflow-y-auto max-h-[400px]">
                 {staffTasks.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">No tasks assigned yet.</div>
+                  <div className="text-center py-8 text-slate-400 text-sm italic">
+                    {filterType === 'all' ? 'No tasks assigned yet.' : 'No tasks found for the selected period.'}
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     {staffTasks.map((task) => {
@@ -800,6 +836,61 @@ export default function ManagerDashboard() {
                 className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl font-medium shadow-sm transition-colors"
               >
                 Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Database Inspector Modal */}
+      {showDbInspector && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full p-6 border border-slate-200 flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Settings2 className="w-5 h-5 text-indigo-600" />
+                  Database Inspector
+                </h3>
+                <p className="text-xs text-slate-500">Viewing raw 'users' table content from SQLite.</p>
+              </div>
+              <button onClick={() => setShowDbInspector(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="overflow-auto flex-1 border border-slate-100 rounded-xl">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-50 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b">ID</th>
+                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b">Name</th>
+                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b">Role</th>
+                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b">Password</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {debugUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 text-sm font-mono text-slate-600">{u.id}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-slate-900">{u.name}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold uppercase">
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm font-mono text-indigo-600 bg-indigo-50/30">{u.password}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowDbInspector(false)}
+                className="bg-slate-900 text-white px-6 py-2 rounded-xl font-medium"
+              >
+                Close Inspector
               </button>
             </div>
           </div>
