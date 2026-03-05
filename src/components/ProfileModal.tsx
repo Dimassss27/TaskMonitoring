@@ -103,6 +103,9 @@ export function ProfileModal({ user, onClose, onUpdate }: ProfileModalProps) {
                 className="hidden"
               />
             </div>
+            <div className="mt-2 px-2 py-0.5 rounded bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider border border-indigo-100">
+              Role: {loginId.split('-')[0]}
+            </div>
           </div>
 
           <div>

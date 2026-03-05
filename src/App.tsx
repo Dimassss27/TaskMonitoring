@@ -56,9 +56,14 @@ export default function App() {
                 {currentUser.name.charAt(0).toUpperCase()}
               </div>
             )}
-            <div className="text-xs sm:text-sm text-slate-500 truncate">
-              <span className="hidden md:inline">Logged in as </span>
-              <span className="font-medium text-slate-900">{currentUser.name}</span>
+            <div className="text-xs sm:text-sm text-slate-500 truncate flex flex-col">
+              <div className="flex items-center gap-1">
+                <span className="font-medium text-slate-900">{currentUser.name}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold uppercase tracking-tight">
+                  {currentUser.id.split('-')[0]}
+                </span>
+              </div>
+              <span className="hidden md:inline text-[10px]">Logged in as {currentUser.role}</span>
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
