@@ -135,6 +135,17 @@ export function ProfileModal({ user, onClose, onUpdate }: ProfileModalProps) {
             />
           </div>
 
+          {user.role === 'staff' && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Manager Name
+              </label>
+              <div className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed">
+                {user.managerName || "No manager assigned"}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               New Password (leave blank to keep current)

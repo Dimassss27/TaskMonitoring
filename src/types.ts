@@ -4,6 +4,7 @@ export interface User {
   role: 'manager' | 'staff';
   password?: string;
   avatar?: string | null;
+  managerName?: string | null;
 }
 
 export interface Task {

@@ -55,6 +55,13 @@ try {
   // Column already exists
 }
 
+// Add manager_name column if it doesn't exist
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN manager_name TEXT`);
+} catch (e) {
+  // Column already exists
+}
+
 try {
   db.exec(`ALTER TABLE tasks ADD COLUMN updated_at TEXT`);
 } catch (e) {}
@@ -66,12 +73,55 @@ if (usersCount.count === 0) {
   insertUser.run('manager-1', 'Alice (Manager)', 'manager', 'manager123');
 }
 
+// Emergency Manager Password Reset via Environment Variable
+const overridePassword = process.env.MANAGER_PASSWORD_OVERRIDE;
+if (overridePassword) {
+  const updateManager = db.prepare('UPDATE users SET password = ? WHERE id = ? AND role = ?');
+  const result = updateManager.run(overridePassword, 'manager-1', 'manager');
+  if (result.changes > 0) {
+    console.log('SECURITY: Manager password has been overridden via environment variable.');
+  }
+}
+
+// FORCE RESET MANAGER (Requested by User)
+// This will find any manager and reset them to manager-1 / manager123
+try {
+  const currentManager = db.prepare("SELECT id FROM users WHERE role = 'manager'").get() as { id: string } | undefined;
+  if (currentManager) {
+    const oldId = currentManager.id;
+    const newId = 'manager-1';
+    const newPass = 'manager123';
+    
+    // Disable FKs temporarily for the reset
+    db.exec('PRAGMA foreign_keys = OFF');
+    
+    // Update tasks if ID is different
+    if (oldId !== newId) {
+      db.prepare('UPDATE tasks SET staff_id = ? WHERE staff_id = ?').run(newId, oldId);
+    }
+    
+    // Update manager account
+    db.prepare("UPDATE users SET id = ?, password = ?, name = 'Alice (Manager)' WHERE role = 'manager'").run(newId, newPass);
+    
+    // Re-enable FKs
+    db.exec('PRAGMA foreign_keys = ON');
+    
+    console.log('SYSTEM: Manager account has been reset to default (manager-1 / manager123)');
+  }
+} catch (e) {
+  console.error('Failed to force reset manager:', e);
+}
+
 // Auth Route
 app.post('/api/auth/login', (req, res) => {
   const { id, password } = req.body;
-  const user = db.prepare('SELECT id, name, role, avatar FROM users WHERE id = ? AND password = ?').get(id, password);
+  const user = db.prepare('SELECT id, name, role, avatar, manager_name AS managerName FROM users WHERE id = ? AND password = ?').get(id, password) as any;
   
   if (user) {
+    if (user.role === 'staff') {
+      const manager = db.prepare("SELECT name FROM users WHERE role = 'manager' LIMIT 1").get() as { name: string } | undefined;
+      user.managerName = manager?.name || user.managerName;
+    }
     res.json({ success: true, user });
   } else {
     res.status(401).json({ success: false, message: 'Invalid ID or password' });
@@ -80,7 +130,20 @@ app.post('/api/auth/login', (req, res) => {
 
 // User Management Routes
 app.get('/api/users', (req, res) => {
-  const users = db.prepare('SELECT id, name, role, avatar FROM users').all();
+  const manager = db.prepare("SELECT name FROM users WHERE role = 'manager' LIMIT 1").get() as { name: string } | undefined;
+  const users = db.prepare('SELECT id, name, role, avatar, manager_name AS managerName FROM users').all();
+  
+  const processedUsers = users.map(u => ({
+    ...u,
+    managerName: u.role === 'staff' ? (manager?.name || u.managerName) : u.managerName
+  }));
+  
+  res.json(processedUsers);
+});
+
+// Debug Route for Manager to see raw DB content (including passwords)
+app.get('/api/admin/debug/users', (req, res) => {
+  const users = db.prepare('SELECT * FROM users').all();
   res.json(users);
 });
 
@@ -91,7 +154,13 @@ app.post('/api/users', (req, res) => {
     const insert = db.prepare('INSERT INTO users (id, name, role, password) VALUES (?, ?, ?, ?)');
     insert.run(id, name, role, password);
     
-    const newUser = db.prepare('SELECT id, name, role, avatar FROM users WHERE id = ?').get(id);
+    const manager = db.prepare("SELECT name FROM users WHERE role = 'manager' LIMIT 1").get() as { name: string } | undefined;
+    const newUser = db.prepare('SELECT id, name, role, avatar, manager_name AS managerName FROM users WHERE id = ?').get(id) as any;
+    
+    if (newUser && newUser.role === 'staff') {
+      newUser.managerName = manager?.name || newUser.managerName;
+    }
+    
     io.emit('user:created', newUser);
     res.json(newUser);
   } catch (error) {
@@ -106,6 +175,11 @@ app.put('/api/users/:id/profile', (req, res) => {
   try {
     const targetId = newId || id;
     
+    // Disable FKs temporarily for the update if ID is changing
+    if (newId && newId !== id) {
+      db.exec('PRAGMA foreign_keys = OFF');
+    }
+
     // Update tasks if ID is changing
     if (newId && newId !== id) {
       db.prepare('UPDATE tasks SET staff_id = ? WHERE staff_id = ?').run(newId, id);
@@ -119,11 +193,24 @@ app.put('/api/users/:id/profile', (req, res) => {
       db.prepare('UPDATE users SET id = ?, name = ?, avatar = ? WHERE id = ?').run(targetId, name, avatar || null, id);
     }
     
-    const updatedUser = db.prepare('SELECT id, name, role, avatar FROM users WHERE id = ?').get(targetId);
+    // Re-enable FKs
+    if (newId && newId !== id) {
+      db.exec('PRAGMA foreign_keys = ON');
+    }
+    
+    const manager = db.prepare("SELECT name FROM users WHERE role = 'manager' LIMIT 1").get() as { name: string } | undefined;
+    const updatedUser = db.prepare('SELECT id, name, role, avatar, manager_name AS managerName FROM users WHERE id = ?').get(targetId) as any;
+    
+    if (updatedUser && updatedUser.role === 'staff') {
+      updatedUser.managerName = manager?.name || updatedUser.managerName;
+    }
+    
     io.emit('user:updated', updatedUser);
     res.json(updatedUser);
   } catch (error) {
     console.error(error);
+    // Ensure FKs are back on if they were off
+    db.exec('PRAGMA foreign_keys = ON');
     res.status(400).json({ error: 'Failed to update profile. ID might already exist.' });
   }
 });
